@@ -1,17 +1,21 @@
 package com.lucasangelo.todosimple.services;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lucasangelo.todosimple.exceptions.AuthorizationException;
 import com.lucasangelo.todosimple.models.User;
 import com.lucasangelo.todosimple.models.enums.ProfileEnum;
 import com.lucasangelo.todosimple.repositories.UserRepository;
+import com.lucasangelo.todosimple.security.UserSpringSecurity;
 import com.lucasangelo.todosimple.services.exceptions.DataBindingViolationException;
 import com.lucasangelo.todosimple.services.exceptions.ObjectNotFoundException;
 
@@ -27,6 +31,10 @@ public class UserService {
 
 
     public User findById(Long id) {
+        UserSpringSecurity userSpringSecurity = authenticated();
+        if (!Objects.nonNull(userSpringSecurity) || !userSpringSecurity.hasRole(ProfileEnum.ADMIN) && !id.equals(userSpringSecurity.getId()))
+            throw new AuthorizationException("Acesso negado!");
+
         Optional<User> user = this.userRepository.findById(id);
         return user.orElseThrow(() -> new ObjectNotFoundException(
             "Usuário não encontrado: id " + id + ", Tipo: " + User.class.getName()
@@ -56,6 +64,14 @@ public class UserService {
             this.userRepository.deleteById(id);
         } catch (Exception e) {
             throw new DataBindingViolationException("Não é possivel excluir pois há entidades relacionadas!");
+        }
+    }
+
+    public static UserSpringSecurity authenticated() {
+        try {
+            return (UserSpringSecurity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        } catch (Exception e) {
+            return null;
         }
     }
 }
