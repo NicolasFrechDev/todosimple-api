@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lucasangelo.todosimple.exceptions.AuthorizationException;
 import com.lucasangelo.todosimple.models.User;
+import com.lucasangelo.todosimple.models.dto.UserCreateDTO;
+import com.lucasangelo.todosimple.models.dto.UserUpdateDTO;
 import com.lucasangelo.todosimple.models.enums.ProfileEnum;
 import com.lucasangelo.todosimple.repositories.UserRepository;
 import com.lucasangelo.todosimple.security.UserSpringSecurity;
@@ -73,5 +77,19 @@ public class UserService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public User fromDTO(@Valid UserCreateDTO obj) {
+        User user = new User();
+        user.setUsername(obj.getUsername());
+        user.setPassword(obj.getPassword());
+        return user;
+    }
+
+    public User fromDTO(@Valid UserUpdateDTO obj) {
+        User user = new User();
+        user.setId(obj.getId());
+        user.setPassword(obj.getPassword());
+        return user;
     }
 }
