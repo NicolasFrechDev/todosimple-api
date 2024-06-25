@@ -108,7 +108,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler imple
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<Object> hanldeAccessDeniedException(
+    public ResponseEntity<Object> handleAccessDeniedException(
             AccessDeniedException accessDeniedException,
             WebRequest request) {
         log.error("Authorization error ", accessDeniedException);
@@ -140,9 +140,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler imple
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException, ServletException {
-        Integer status = HttpStatus.UNAUTHORIZED.value();
+        Integer status = HttpStatus.FORBIDDEN.value();
         response.setStatus(status);
-        response.setContentType("apllication/json");
+        response.setContentType("application/json");
         ErrorResponse errorResponse = new ErrorResponse(status, "Email ou senha inválidos.");
         response.getWriter().append(errorResponse.toJson());
     }
